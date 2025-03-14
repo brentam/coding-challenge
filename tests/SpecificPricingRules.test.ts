@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js';
 import { Item } from '../src/entities/Entities';
-import { DefaultPricingRule, XForYDealPricingRule, FixedPriceDeal, FreeItemWithAnother, CompositePercentRule } from '../src/pricing/SpecificPricingRules';
+import { DefaultPricingRule, XForYDealPricingRule, FixedPriceDeal, FreeItemWithAnother, CompositePercentRule, MultiRule } from '../src/pricing/SpecificPricingRules';
 
 describe('SpecificPricingRules', () => {
     const classicAd: Item = {
@@ -126,15 +126,16 @@ describe('SpecificPricingRules', () => {
             expect(result?.discountedPrice.toString()).toBe('1727.936'); // 2159.92 * 0.8
         });
 
-        // it should run the
+        /*
+        initial price of all 6 items 1937.94
+        after the "inner rule" FixedPriceDeal is applied we get 1799.94
+        20% discount is applied to 1799.94 and we get 1439.952
+        */
         it('should calculateTotal the 20% discount after other inner rules are applied', () => {
             const rule = new CompositePercentRule([new FixedPriceDeal(standoutAd, new Decimal(299.99))]
                 , new Decimal(1000), new Decimal(0.2));
             const items = [standoutAd, standoutAd, standoutAd, standoutAd, standoutAd, standoutAd]
             const result = rule.calculateTotal(items);
-            //initial price of all 6 items 1937.94
-            //after the "inner rule" FixedPriceDeal is applied we get 1799.94
-            //20% discount is applied to 1799.94 and we get 1439.952
             expect(result?.discountedPrice.toString()).toBe('1439.952'); // 1799.94 * 0.8
         });
 
@@ -144,5 +145,29 @@ describe('SpecificPricingRules', () => {
             const result = rule.calculateTotal(items);
             expect(result?.discountedPrice.toString()).toBe('809.97'); // No discount applied
         });
+    });
+
+    describe('MultiRule', () => {
+        
+        /*
+          the total original price => 5*322.99 + 394.99 = 2067.93
+          one rule will apply in this case:
+            1. 5 for 4 standout ads => (5 * 322.99)- 322.99 +394.99 = 1686.95
+        */        
+        it('should pick the best discount', () => {
+            const rule = new MultiRule([ new XForYDealPricingRule(standoutAd, 5, 4),
+                new FixedPriceDeal(premiumAd, new Decimal(389.99))]);
+            const items = [standoutAd, standoutAd, standoutAd, standoutAd, standoutAd, premiumAd];
+            const result = rule.calculateTotal(items);
+            expect(result?.discountedPrice.toString()).toBe('1686.95'); 
+        });
+
+        it('should work with single rule', () => {
+            const rule = new MultiRule([new FixedPriceDeal(standoutAd, new Decimal(299.99))])
+            const items = [standoutAd] 
+            const result = rule.calculateTotal(items);
+            expect(result?.discountedPrice.toString()).toBe('299.99'); 
+        });
+
     });
 });

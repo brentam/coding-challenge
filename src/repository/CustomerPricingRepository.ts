@@ -25,9 +25,7 @@ const myer: Customer = { id: 4, name: "MYER" };
 // this map stores the pricing rules for each customer
 const customerPricingRules: Map<number, PricingRule> = new Map<number, PricingRule>([
     [secondBite.id, new XForYDealPricingRule(classicAd, 3, 2)],
-    [axilCoffeeRoasters.id,
-    new FixedPriceDeal(standoutAd, new Decimal(299.99))
-    ],
+    [axilCoffeeRoasters.id, new FixedPriceDeal(standoutAd, new Decimal(299.99))],
     [myer.id,
     new CompositePercentRule([
         new XForYDealPricingRule(standoutAd, 5, 4),

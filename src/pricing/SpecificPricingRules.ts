@@ -130,3 +130,22 @@ export class CompositePercentRule extends PricingRule {
         return theResult;
     }
 }
+
+/**
+ * Concrete implementation to use when holding multi rules
+ * e.g. someCustomer -> new MultiRule([new XForYDealPricingRule(classicAd, 3, 2),new FixedPriceDeal(standoutAd, new Decimal(299.99))])],
+ * 
+ * @param rules - An array of PricingRule objects 
+ */
+export class MultiRule extends PricingRule {
+    private rules: PricingRule[];
+
+    constructor(rules: PricingRule[]) {
+        super();
+        this.rules = rules;
+    }
+
+    apply(items: Item[]): PricingRulesResult | null {
+        return applyRules(items, this.rules);
+    }
+}
