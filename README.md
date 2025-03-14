@@ -1,4 +1,4 @@
-# Seek Coding Challenge
+# Coding Challenge
 
 This project is a coding challenge for implementing a checkout system with special pricing rules for privileged customers.
 
